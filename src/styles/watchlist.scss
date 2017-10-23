@@ -1,0 +1,68 @@
+.header {
+	border-left: 2px solid #949494;
+	border-bottom: 2px solid #949494;
+	white-space:nowrap;
+	text-align: center;
+	padding-bottom: 3px;
+	cursor: pointer;
+	width: 16%;
+	&:last-child {
+		border-right: 2px solid #949494;
+	}
+}
+
+.item {
+	padding: 5px 0;
+	white-space:nowrap;
+	text-align: center;
+	width: 16%;
+	border-bottom: 2px solid #949494;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.name {
+	width: 20%;
+}
+
+
+.headers {
+	margin: 0 auto;
+	width: 980px;
+	margin-top: 15px;
+	display: flex;
+	justify-content:center;
+}
+
+.list {
+	width: 980px;
+	margin: 0 auto;
+}
+
+.asset {
+	display: flex;
+	justify-content:center;
+	width: 980px;
+}
+
+.positive {
+	color: #00E676;
+}
+
+.negative {
+	color: #ff333a;
+}
+
+.unwatch {
+	position: absolute;
+	zindex: 2;
+	color: white;
+	height: 18px;
+	width: 18px;
+	padding: 2px;
+	background-color: #00E676;
+	margin-top: 3px;
+	left: 228px;
+	border-radius: 5px;
+	cursor: pointer;
+}

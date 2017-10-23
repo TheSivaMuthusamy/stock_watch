@@ -1,0 +1,25 @@
+.axis .tick line{
+  visibility:hidden;
+}
+
+.axis {
+	font: 14px roboto;
+}
+
+.axis text {
+	fill: #949494;
+}
+
+.grid line {
+  stroke: #949494;;
+  stroke-opacity: 0.7;
+  shape-rendering: crispEdges;
+}
+
+.grid path {
+  stroke-width: 0;
+}
+
+.view {
+	fill: #000;
+}
