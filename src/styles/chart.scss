@@ -22,4 +22,22 @@
 
 .view {
 	fill: #000;
+	pointer-events: all,
+}
+
+
+.focus circle {
+  fill: #fff;
+  stroke: #fff;
+}
+
+.focus text {
+	fill: #fff;
+	font: 12px roboto;
+}
+
+.hover-line {
+  stroke: #fff;
+  stroke-width: 2px;
+  stroke-dasharray: 3,3;
 }
