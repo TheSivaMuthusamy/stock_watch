@@ -36,6 +36,8 @@
 	border-radius: 5px;
 	&:hover {
 		cursor: pointer;
+		border: 1px solid white;
+		padding: 4px;
 	}
 	&.active {
 		background-color: #00E676;

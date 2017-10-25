@@ -1,22 +1,24 @@
 import React from 'react';
 import yahooFinance from 'yahoo-finance';
 import * as d3 from "d3";
-import { scaleLinear } from 'd3-scale'
-import { max } from 'd3-array'
-import { select } from 'd3-selection'
+import { scaleLinear } from 'd3-scale';
+import { max } from 'd3-array';
+import { select } from 'd3-selection';
+import * as fc from 'd3fc';
 
 export default class Chart extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			data: []
+			data: [],
+      timeperiod: '1mo'
 		}
 		this.getChart = this.getChart.bind(this)
 		this.createChart = this.createChart.bind(this)
 	}
 
   componentDidMount() {
-   this.getChart('AAPL', '90m', '1mo')
+   this.getChart(this.props.current, '90m', '1mo')
   }
     
   componentDidUpdate() {
@@ -40,20 +42,22 @@ export default class Chart extends React.Component {
 				})
 				this.setState({
 					data: rounded,
+          timeperiod: range
 				})
 			})
 	}
 
   createChart() {
+    d3.selectAll("svg > *").remove();
     const self = this
     const svg = d3.select("svg"),
    	margin = {top: 10, right: 20, bottom: 30, left: 50},
-    width = +svg.attr("width") - margin.left - margin.right,
-    height = +svg.attr("height") - margin.top - margin.bottom,
+    width = 890,
+    height = 460,
     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
-    var parseTime = d3.timeFormat("%B %d, %Y"), 
+    const parseTime = d3.timeFormat("%B %d, %Y"), 
     bisectDate = d3.bisector(function(d) { return d.date; }).left,
     formatValue = d3.format(",.2f"),
     formatCurrency = function(d) { return "$" + formatValue(d); };
@@ -68,7 +72,7 @@ export default class Chart extends React.Component {
     let testy = y
 
     const zoom = d3.zoom()
-  		.scaleExtent([1, 4])
+  		.scaleExtent([1, 40])
   		.translateExtent([[-100, -100], [width + 90, height + 100]])
   		.on("zoom", zoomed)
 
@@ -89,16 +93,20 @@ export default class Chart extends React.Component {
   	}
 
   	function zoomed() {
+      console.log(xAxis)
   		const e = d3.event;
   		const tx = Math.min(0, Math.max(e.transform.x, width - width*e.transform.k));
     	const ty = Math.min(0, Math.max(e.transform.y, height - height*e.transform.k));
-  		dataline.attr("transform", 'translate(' + [tx,ty] + ')scale(' + e.transform.k + ')');
-      focus.attr("transform", 'translate(' + [tx,ty] + ')scale(' + e.transform.k + ')');
-  		const t = d3.zoomIdentity.translate(tx, ty).scale(e.transform.k);
-    	gX.call(xAxis.scale(t.rescaleX(x)));
-    	gY.call(yAxis.scale(t.rescaleY(y)));
+      const t = d3.zoomIdentity.translate(tx, ty).scale(e.transform.k);
       testx = t.rescaleX(x)
       testy = t.rescaleY(y)
+  		dataline.attr("d", d3.line()
+        .x(function(d) { return testx(d.date); })
+        .y(function(d) { return testy(d.close); }));
+      focus.attr("transform", 'translate(' + [tx,ty] + ')scale(' + e.transform.k + ')');  		
+    	gX.call(xAxis.scale(t.rescaleX(x)));
+    	gY.call(yAxis.scale(t.rescaleY(y)));
+     
     	gridX.call(make_x_gridlines()
     		.scale(t.rescaleX(x))
     		.tickSize(-height)
@@ -111,7 +119,6 @@ export default class Chart extends React.Component {
   	}
     
     function mousemove() {
-
       const x0 = testx.invert(d3.mouse(this)[0]),
           i = bisectDate(self.state.data, x0, 1),
           d0 = self.state.data[i - 1],
@@ -127,12 +134,8 @@ export default class Chart extends React.Component {
     }
 
   	const ydee = d3.extent(this.state.data, function(d) { return d.close; });
-
-    const xdee = d3.extent(this.state.data, function(d) { return d.date; });
-    console.log(xdee[1])
-    xdee[1] = xdee[1] + 5;
-    console.log(xdee[1])
     y.domain(ydee);
+    
     x.domain(d3.extent(this.state.data, function(d) { return d.date; }));
 
   	const xValues = this.state.data.filter((d, i) => i % 32 === 0).map(d => d.date);
@@ -186,13 +189,13 @@ export default class Chart extends React.Component {
       .call(yAxis);
 
 	  const dataline = main.append("path")
-        .datum(this.state.data)
-	      .attr("fill", "none")
-	      .attr("stroke", "#00E676")
-	      .attr("stroke-linejoin", "round")
-	      .attr("stroke-linecap", "round")
-	      .attr("stroke-width", 3)
-	      .attr("d", line);
+      .datum(this.state.data)
+      .attr("fill", "none")
+      .attr("stroke", "#00E676")
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-linecap", "round")
+      .attr("stroke-width", 2)
+      .attr("d", line);
 
     const focus = g.append("g")
       .attr("class", "focus")
@@ -210,28 +213,46 @@ export default class Chart extends React.Component {
       .attr("dx", "-3.5em")
 
     focus.append("line")
-        .attr("class", "x-hover-line hover-line")
-        .attr("y1", 0)
-        .attr("y2", height);
+      .attr("class", "x-hover-line hover-line")
+      .attr("y1", 0)
+      .attr("y2", height);
 
     focus.append("line")
-        .attr("class", "y-hover-line hover-line")
-        .attr("x1", 0)
-        .attr("x2", width);
+      .attr("class", "y-hover-line hover-line")
+      .attr("x1", 0)
+      .attr("x2", width);
 
     g.on("mousemove",  mousemove)
       .on("mouseover", function() { focus.style("display", null); })
       .on("mouseout", function() { focus.style("display", "none"); })
       .call(zoom)
-
-}
-
+  }
 
 	render() {
 		return (
-			<svg ref={node => this.node = node}
-      		width={960} height={500}>
-      	</svg>
-		)
+      <div>
+         <div className="timeperiod-control">
+          <div className={(this.state.timeperiod === "1d") ? "timeperiod 1d active" : "timeperiod 1d"} 
+            onClick={() => this.getChart(this.props.current, '2m', '1d')}>1D</div>
+          <div className={(this.state.timeperiod === "5d") ? "timeperiod 5d active" : "timeperiod 5d"} 
+            onClick={() => this.getChart(this.props.current, '15m', '5d')}>5D</div>
+          <div className={(this.state.timeperiod === "1mo") ? "timeperiod 1mo active" : "timeperiod 1mo"} 
+            onClick={() => this.getChart(this.props.current, '90m', '1mo')}>1M</div>
+          <div className={(this.state.timeperiod === "6mo") ? "timeperiod 6mo active" : "timeperiod 6mo"} 
+            onClick={() => this.getChart(this.props.current, '1d', '6mo')}>6M</div>
+          <div className={(this.state.timeperiod === "ytd") ? "timeperiod ytd active" : "timeperiod ytd"} 
+            onClick={() => this.getChart(this.props.current, '1d', 'ytd')}>YTD</div>
+          <div className={(this.state.timeperiod === "1y") ? "timeperiod 1y active" : "timeperiod 1y"} 
+            onClick={() => this.getChart(this.props.current, '5d', '1y')}>1Y</div>
+          <div className={(this.state.timeperiod === "5y") ? "timeperiod 5y active" : "timeperiod 5y"} 
+            onClick={() => this.getChart(this.props.current, '1mo', '5y')}>5Y</div>
+          <div className={(this.state.timeperiod === "max") ? "timeperiod max active" : "timeperiod max"} 
+            onClick={() => this.getChart(this.props.current, '1mo', 'max')}>Max</div>
+        </div>
+  			<svg ref={node => this.node = node}
+        	width={1000} height={500}>
+        </svg>
+      </div>
+		);
 	}
 }

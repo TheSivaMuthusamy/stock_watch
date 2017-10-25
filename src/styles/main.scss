@@ -2,6 +2,12 @@ html {
 	font-family: 'Roboto', sans-serif;
 }
 
+a {
+	text-decoration: none;
+	&:hover{
+		text-decoration: underline;
+	}
+}
 body {
 	background-color: #2f3136;
 	color: #949494;

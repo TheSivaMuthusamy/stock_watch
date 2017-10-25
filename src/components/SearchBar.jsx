@@ -90,6 +90,6 @@ export default class SearchBar extends React.Component {
 			menuStyle= {menuStyle}
 			autoHighlight= {false}
 			/>
-		)
+		);
 	}
 }

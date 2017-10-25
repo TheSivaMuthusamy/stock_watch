@@ -41,3 +41,23 @@
   stroke-width: 2px;
   stroke-dasharray: 3,3;
 }
+
+.timeperiod-control {
+	width: 923px;
+	margin: 0 auto;
+}
+
+.timeperiod {
+	cursor: pointer;
+	display: inline-block;
+	width: 12.2%;
+	text-align: center;
+	border-left: 2px solid #949494;
+	&:last-child {
+		border-right: 2px solid #949494;
+	}
+}
+
+.active {
+	color: #fff;
+}
