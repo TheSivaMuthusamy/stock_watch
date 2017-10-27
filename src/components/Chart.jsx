@@ -30,7 +30,7 @@ export default class Chart extends React.Component {
   }
 
 	getChart(symbol, interval = '1d', range = '1y') {
-		const query = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?formatted=true&lang=en-US&region=US&interval=${interval}&events=div%7Csplit&range=${range}&corsDomain=finance.yahoo.com`;
+		const query = `https://warm-peak-38829.herokuapp.com/https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?formatted=true&lang=en-US&region=US&interval=${interval}&events=div%7Csplit&range=${range}&corsDomain=finance.yahoo.com`;
 		function round(value, decimals) {
 			return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
 		}
@@ -53,10 +53,9 @@ export default class Chart extends React.Component {
 
   getHeadlines(symbol) {
     const self = this
-    Feed.load(`https://feeds.finance.yahoo.com/rss/2.0/headline?s=${symbol}&region=US&lang=en-US`, 
+    Feed.load(`https://warm-peak-38829.herokuapp.com/https://feeds.finance.yahoo.com/rss/2.0/headline?s=${symbol}&region=US&lang=en-US`, 
       function(err, rss){
         if(err) {return}
-        console.log(rss)
         self.setState({
           headlines: rss.items
         })
