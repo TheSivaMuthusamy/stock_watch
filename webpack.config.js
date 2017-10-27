@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 var config = {
 	entry: './src/index.jsx',
@@ -29,7 +30,8 @@ var config = {
 	    fs: 'empty',
 	    net: 'empty',
 	    tls: 'empty'
-  	}	
+  	},
+  	plugins: []	
 };
 
 if(process.env.NODE_ENV === 'production') {

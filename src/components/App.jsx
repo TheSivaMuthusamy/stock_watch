@@ -93,7 +93,7 @@ export default class App extends React.Component {
     const emptyWatch = []
     const self = this
     if (this.state.watch.length === 0) {
-      console.log('derp')
+      console.log('anus')
       return
     } else {
        yahooFinance.quote({

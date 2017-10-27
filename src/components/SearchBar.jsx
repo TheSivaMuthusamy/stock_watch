@@ -58,7 +58,7 @@ export default class SearchBar extends React.Component {
 			inputValue: event.target.value
 		})
 
-		fetch(url)
+		fetch("https://warm-peak-38829.herokuapp.com/" + url)
 			.then(response => response.json())
 			.then(data => 
 				this.setState({data: data.ResultSet.Result})
