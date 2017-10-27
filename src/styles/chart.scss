@@ -61,3 +61,30 @@
 .active {
 	color: #fff;
 }
+
+.headlines {
+	width: 990px;
+	margin: 0 auto;
+}
+
+.headline {
+	padding: 14px 0;
+}
+
+.title {
+	color: #fff;
+	font-size: 20px;
+}
+
+.description {
+	font-size: 14px;
+}
+
+.description {
+	max-height: 57px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+  	-webkit-line-clamp: 3;
+  	-webkit-box-orient: vertical;
+}

@@ -43,7 +43,7 @@ export default class SearchBar extends React.Component {
 				</div>
 				<div className="suggestions end">
 					<p>{item.typeDisp + ' - ' + item.exchDisp}</p>
-					<FaEye className={cn} onClick={() => this.props.addToWatch(item)}/>
+					<FaEye className={cn} onClick={(e) => this.props.addToWatch(e, item)}/>
 				</div>
 			</div>
 		)
@@ -67,7 +67,8 @@ export default class SearchBar extends React.Component {
 	}
 
 	onSearch(value) {
-		console.log(value)
+		this.props.onEnterChart(value.symbol)
+		window.location.href = ('#/' + value.symbol)
 	}
 
 	render() {
@@ -90,6 +91,6 @@ export default class SearchBar extends React.Component {
 			menuStyle= {menuStyle}
 			autoHighlight= {false}
 			/>
-		);
+		)
 	}
 }

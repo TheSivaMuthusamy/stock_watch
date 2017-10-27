@@ -2,6 +2,12 @@ html {
 	font-family: 'Roboto', sans-serif;
 }
 
+hr {
+	height: 1px;
+    border: 0;
+    border-top: 2px solid #949494;
+}
+
 a {
 	text-decoration: none;
 	&:hover{

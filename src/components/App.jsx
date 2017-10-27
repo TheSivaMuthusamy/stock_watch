@@ -18,6 +18,7 @@ export default class App extends React.Component {
 		this.removeFromWatch = this.removeFromWatch.bind(this);
     this.onEnterChart = this.onEnterChart.bind(this);
     this.sortPortfolio = this.sortPortfolio.bind(this);
+    this.continueWatching = this.continueWatching.bind(this)
 	}
 
   componentDidUpdate() {
@@ -48,7 +49,7 @@ export default class App extends React.Component {
     }
   }
 
-	addToWatch(item) {
+	addToWatch(e, item) {
 		const watched = (this.state.watch).some((el) => {return el.symbol === item.symbol})
 		const self = this
 		if (watched) {
@@ -60,9 +61,10 @@ export default class App extends React.Component {
 		} else {
 			yahooFinance.quote({
 	  			symbol: item.symbol,
-	  			modules: ['price']       
+	  			modules: ['price', 'defaultKeyStatistics', 'financialData', 'summaryDetail']       
 			}, function(err, quote) {
 	  			const copyWatch = self.state.watch.slice()
+          const pegRatio = (quote.defaultKeyStatistics === undefined) ? null : quote.defaultKeyStatistics.pegRatio
 	  			const newItem = {
 	  				symbol: quote.price.symbol,
 	  				name: quote.price.shortName,
@@ -71,23 +73,66 @@ export default class App extends React.Component {
 	  				change: quote.price.regularMarketChange,
 	  				changePercent: quote.price.regularMarketChangePercent,
 	  				exchange: quote.price.exchangeName,
-	  				equity: quote.price.quoteType
+	  				equity: quote.price.quoteType,
+            PE: quote.summaryDetail.trailingPE,
+            PEG: (quote.defaultKeyStatistics === undefined) ? undefined : quote.defaultKeyStatistics.pegRatio,
+            debtToEquity: (quote.financialData === undefined) ? null : quote.financialData.debtToEquity,
+            freeCashFlow: (quote.financialData === undefined) ? null : quote.financialData.freeCashflow
 	  			}
 	  			copyWatch.push(newItem)
 	  			self.setState({
 	  				watch: copyWatch
 	  			})
-	  			console.log(copyWatch)
 			});
 		}
+    e.stopPropagation()
 	}
 
-	removeFromWatch(item) {
+  continueWatching(watch) {
+    const symbols = watch.map(function(el) {return el.symbol})
+    const emptyWatch = []
+    const self = this
+    if (this.state.watch.length === 0) {
+      console.log('derp')
+      return
+    } else {
+       yahooFinance.quote({
+          symbols: symbols,
+          modules: ['price', 'defaultKeyStatistics', 'financialData', 'summaryDetail']       
+      }, function(err, quote) {
+
+        for(let i = 0; i < symbols.length; i++) {
+          let place = symbols[i]
+          const newItem = {
+            symbol: quote[place].price.symbol,
+            name: quote[place].price.shortName,
+            price: quote[place].price.regularMarketPrice,
+            marketCap: quote[place].price.marketCap,
+            change: quote[place].price.regularMarketChange,
+            changePercent: quote[place].price.regularMarketChangePercent,
+            exchange: quote[place].price.exchangeName,
+            equity: quote[place].price.quoteType,
+            PE: quote[place].summaryDetail.trailingPE,
+            PEG: (quote[place].defaultKeyStatistics === undefined) ? undefined : quote[place].defaultKeyStatistics.pegRatio,
+            debtToEquity: (quote[place].financialData === undefined) ? null : quote[place].financialData.debtToEquity,
+            freeCashFlow: (quote[place].financialData === undefined) ? null : quote[place].financialData.freeCashflow
+          }
+          emptyWatch.push(newItem)
+        }
+        self.setState({
+          watch: emptyWatch
+        })
+      })
+    }
+  }
+
+	removeFromWatch(e, item) {
 		const copy = this.state.watch.slice()
 		const deleteWatch = (this.state.watch).filter((el) => {return el.symbol !== item.symbol})
 		this.setState({
 			watch: deleteWatch
 		})
+     e.stopPropagation()
 	}
 
 	onEnterChart(symbol) {
@@ -99,7 +144,11 @@ export default class App extends React.Component {
   sortPortfolio(method) {
     if (this.state.sortMethod === method) {
      const sortedWatch =  this.state.watch.sort(function(a,b) {
-          if (a[method] < b[method])
+          if(!a[method])
+            return 1;
+          else if(!b[method])
+            return -1;
+          else if (a[method] < b[method])
             return 1;
           else if (a[method] == b[method])
               return 0;
@@ -112,7 +161,11 @@ export default class App extends React.Component {
       })
     } else {
       const sortedWatch = this.state.watch.sort(function(a,b) {
-          if (a[method] < b[method])
+          if(!a[method])
+            return 1;
+          else if(!b[method])
+            return -1;
+          else if (a[method] < b[method])
             return -1;
           else if (a[method] == b[method])
               return 0;
@@ -135,7 +188,9 @@ export default class App extends React.Component {
                                                       removeFromWatch={this.removeFromWatch} 
                                                       addToWatch={this.addToWatch} 
                                                       onEnterChart={this.onEnterChart} 
-                                                      sort={this.sortPortfolio}/>)} />
+                                                      sort={this.sortPortfolio}
+                                                      sortMethod={this.state.sortMethod}
+                                                      continueWatching={this.continueWatching} />)} />
     				<Route path='/:symbol' render={(props) =>(<Chart watch={this.state.watch}
                                                       current={this.state.current} />)} />
           </Switch>

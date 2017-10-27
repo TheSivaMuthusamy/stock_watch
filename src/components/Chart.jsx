@@ -1,5 +1,6 @@
 import React from 'react';
 import yahooFinance from 'yahoo-finance';
+import Feed from 'rss-to-json';
 import * as d3 from "d3";
 import { scaleLinear } from 'd3-scale';
 import { max } from 'd3-array';
@@ -11,14 +12,17 @@ export default class Chart extends React.Component {
 		super();
 		this.state = {
 			data: [],
-      timeperiod: '1mo'
+      timeperiod: '1mo',
+      headlines: []
 		}
-		this.getChart = this.getChart.bind(this)
-		this.createChart = this.createChart.bind(this)
+		this.getChart = this.getChart.bind(this);
+		this.createChart = this.createChart.bind(this);
+    this.getHeadlines = this.getHeadlines.bind(this);
 	}
 
   componentDidMount() {
-   this.getChart(this.props.current, '90m', '1mo')
+    this.getHeadlines(this.props.current)
+    this.getChart(this.props.current, '90m', '1mo')
   }
     
   componentDidUpdate() {
@@ -47,6 +51,18 @@ export default class Chart extends React.Component {
 			})
 	}
 
+  getHeadlines(symbol) {
+    const self = this
+    Feed.load(`https://feeds.finance.yahoo.com/rss/2.0/headline?s=${symbol}&region=US&lang=en-US`, 
+      function(err, rss){
+        if(err) {return}
+        console.log(rss)
+        self.setState({
+          headlines: rss.items
+        })
+    });
+  }
+
   createChart() {
     d3.selectAll("svg > *").remove();
     const self = this
@@ -57,7 +73,8 @@ export default class Chart extends React.Component {
     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
-    const parseTime = d3.timeFormat("%B %d, %Y"), 
+    const parseTime = d3.timeFormat("%B %d, %Y"),
+    parseTimeOther = d3.timeFormat("%I:%M"),
     bisectDate = d3.bisector(function(d) { return d.date; }).left,
     formatValue = d3.format(",.2f"),
     formatCurrency = function(d) { return "$" + formatValue(d); };
@@ -66,7 +83,7 @@ export default class Chart extends React.Component {
     	.rangeRound([0, width - 2]);
 
     const y = d3.scaleLinear()
-    	.rangeRound([height, 10]);
+    	.rangeRound([height - 10, 10]);
 
     let testx = x
     let testy = y
@@ -93,7 +110,6 @@ export default class Chart extends React.Component {
   	}
 
   	function zoomed() {
-      console.log(xAxis)
   		const e = d3.event;
   		const tx = Math.min(0, Math.max(e.transform.x, width - width*e.transform.k));
     	const ty = Math.min(0, Math.max(e.transform.y, height - height*e.transform.k));
@@ -127,10 +143,14 @@ export default class Chart extends React.Component {
       focus.attr("transform", "translate(" + testx(d.date) + "," + testy(d.close) + ")");
       focus.select(".ytooltip").text(formatCurrency(d.close));
       focus.select(".xtooltip").text(parseTime(d.date));
+      if (self.state.timeperiod === '1d') {
+        focus.select(".xtooltip2").text(parseTimeOther(d.date));
+      }
       focus.select(".x-hover-line").attr("y2", height - testy(d.close));
       focus.select(".y-hover-line").attr("x2", -width - testx(d.date) + 890.5);
       focus.select(".ytooltip").attr("x", -width - testx(d.date) + 843.5);
       focus.select(".xtooltip").attr("y",height - testy(d.close) + 18);
+      focus.select(".xtooltip2").attr("y",height - testy(d.close) + 30);
     }
 
   	const ydee = d3.extent(this.state.data, function(d) { return d.close; });
@@ -212,6 +232,10 @@ export default class Chart extends React.Component {
       .attr("class", "xtooltip")
       .attr("dx", "-3.5em")
 
+    focus.append("text")
+      .attr("class", "xtooltip2")
+      .attr("dx", "-1em")
+
     focus.append("line")
       .attr("class", "x-hover-line hover-line")
       .attr("y1", 0)
@@ -252,6 +276,18 @@ export default class Chart extends React.Component {
   			<svg ref={node => this.node = node}
         	width={1000} height={500}>
         </svg>
+        <hr style={{margin: '30px 0'}} />
+        <hr style={{marginBottom: '10px'}}/>
+        <div className="headlines">
+          {this.state.headlines.map((headline, key) => {
+            return  (
+              <div className="headline" key={key}>
+                <a className="title" href={headline.url.slice(0, -10)}>{headline.title}</a>
+                <div className="description">{headline.description}</div>
+              </div>
+            )
+          })}
+        </div>
       </div>
 		);
 	}
