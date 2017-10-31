@@ -29,8 +29,10 @@ export default class WatchList extends React.Component {
 		return (
 			<div className="list-wrapper">
 				<div className="headers">
-					<div className="header symbol" onClick={() => this.props.sort('symbol')}>Symbol 
-            <div className="arrow">{this.props.sortMethod === 'symbol' ? '▲' : '▼'}</div>
+          <div className="symbol-container">
+  					<div className="header symbol" onClick={() => this.props.sort('symbol')}>Symbol 
+              <div className="arrow">{this.props.sortMethod === 'symbol' ? '▲' : '▼'}</div>
+            </div>
           </div>
 					<div className="header name" onClick={() => this.props.sort('name')}>Name
             <div className="arrow">{this.props.sortMethod === 'name' ? '▲' : '▼'}</div>
@@ -68,11 +70,13 @@ export default class WatchList extends React.Component {
 						const cn = (asset.change > 0) ? ' positive' : ' negative'
 						return (
 							<div className="asset" key={key}> 
-								<div className="svg-container"><FaEye className="unwatch" onClick={(e) => this.props.removeFromWatch(e, asset)}/></div>
-								<a href={'#/' + asset.symbol} className={"item symbol" + cn} 
-                    onClick={() => this.props.onEnterChart(asset.symbol)}>
-                  {asset.symbol}
-                </a>
+                <div className="symbol-container">
+  								<FaEye className="unwatch" onClick={(e) => this.props.removeFromWatch(e, asset)}/>
+                  <a href={'#/' + asset.symbol} className={"item symbol" + cn} 
+                      onClick={() => this.props.onEnterChart(asset.symbol)}>
+                    {asset.symbol}
+                  </a>
+                </div>
 								<a href={'#/' + asset.symbol} className={"item name" + cn}
                     onClick={() => this.props.onEnterChart(asset.symbol)}>
                   {asset.name}

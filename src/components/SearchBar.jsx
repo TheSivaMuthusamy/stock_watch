@@ -61,7 +61,10 @@ export default class SearchBar extends React.Component {
 		fetch("https://warm-peak-38829.herokuapp.com/" + url)
 			.then(response => response.json())
 			.then(data => 
-				this.setState({data: data.ResultSet.Result})
+				{
+					const filterData = data.ResultSet.Result.filter((el) => el.typeDisp !== "Option")				
+					this.setState({data: filterData})
+				}
 			)
 		
 	}

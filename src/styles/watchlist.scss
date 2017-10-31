@@ -1,6 +1,13 @@
 .list-wrapper {
 	overflow-x: scroll;
 	white-space: nowrap;
+	&::-webkit-scrollbar {
+		height: 4px;
+	}
+	&::-webkit-scrollbar-thumb {
+		background-color: darkgrey;
+		width: 56px;
+	}
 }
 
 .header {
@@ -34,21 +41,28 @@
 	overflow: hidden;
 }
 
-.name {
-	width: 195.2px;
+.symbol-container {
+    position: absolute;
+    background-color: #36393e;
+    height: 31px;
+    padding-left: 10px;
 }
 
+.name {
+	width: 195.2px;
+	margin-left: 166.55px;
+}
 
 .headers {
-	margin: 0 auto;
 	width: 980px;
 	margin-top: 15px;
+	margin-right: 10px;
 	justify-content:center;
 }
 
 .list {
 	width: 980px;
-	margin: 0 auto;
+	margin-right: 10px;
 }
 
 .asset {
@@ -64,14 +78,10 @@
 	color: #ff333a;
 }
 
-.svg-container {
-	position: relative;
-	zindex: 2;
-	margin-top: 3px;
-}
-
 .unwatch {
 	position: absolute;
+	zindex: 99;
+	margin-top: 2px;
 	color: white;
 	height: 18px;
 	width: 18px;
@@ -83,4 +93,11 @@
 		border: 1px solid white;
 		padding: 2px;
 	}
+}
+
+.empty-watch {
+	margin: 0 auto;
+    width: 900px;
+    margin-top: 200px;
+    text-align: center;
 }

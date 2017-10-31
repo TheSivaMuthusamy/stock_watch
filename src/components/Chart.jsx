@@ -2,10 +2,6 @@ import React from 'react';
 import yahooFinance from 'yahoo-finance';
 import Feed from 'rss-to-json';
 import * as d3 from "d3";
-import { scaleLinear } from 'd3-scale';
-import { max } from 'd3-array';
-import { select } from 'd3-selection';
-import * as fc from 'd3fc';
 
 export default class Chart extends React.Component {
 	constructor() {
@@ -64,7 +60,8 @@ export default class Chart extends React.Component {
 
   createChart() {
     d3.selectAll("svg > *").remove();
-    const self = this
+    const self = this;
+    const lineColor = (this.props.watch.filter((el) => el.symbol === self.props.current)[0].change > 0) ? '#00E676' : '#ff333a'
     const svg = d3.select("svg"),
    	margin = {top: 10, right: 20, bottom: 30, left: 50},
     width = 890,
@@ -210,7 +207,7 @@ export default class Chart extends React.Component {
 	  const dataline = main.append("path")
       .datum(this.state.data)
       .attr("fill", "none")
-      .attr("stroke", "#00E676")
+      .attr("stroke", lineColor)
       .attr("stroke-linejoin", "round")
       .attr("stroke-linecap", "round")
       .attr("stroke-width", 2)

@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {HashRouter, Switch, Route, Redirect} from 'react-router-dom';
+import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import Portfolio from './Portfolio.jsx'
 import Chart from './Chart.jsx'
 import yahooFinance from 'yahoo-finance';
@@ -23,11 +23,13 @@ export default class App extends React.Component {
 
   componentDidUpdate() {
     // Writes  current state to local storage after an update
-      this.writeToStorage(this.state)
+ 
+    this.writeToStorage(this.state)
   }
 
   getFromStorage(state) {
     // Returns state from local storage or returns intial state
+ 
     try {
       const persistantState = localStorage.getItem('stateFinance');
       if(persistantState === null) {
@@ -141,7 +143,9 @@ export default class App extends React.Component {
   }
 
   sortPortfolio(method) {
-    if (this.state.sortMethod === method) {
+    if(this.state.watch.length === 0) {
+      return;   
+    } else if (this.state.sortMethod === method) {
      const sortedWatch =  this.state.watch.sort(function(a,b) {
           if(!a[method])
             return 1;
