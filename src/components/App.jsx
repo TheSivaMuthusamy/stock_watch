@@ -65,6 +65,7 @@ export default class App extends React.Component {
 	  			symbol: item.symbol,
 	  			modules: ['price', 'defaultKeyStatistics', 'financialData', 'summaryDetail']       
 			}, function(err, quote) {
+          console.log(quote)
 	  			const copyWatch = self.state.watch.slice()
           const pegRatio = (quote.defaultKeyStatistics === undefined) ? null : quote.defaultKeyStatistics.pegRatio
 	  			const newItem = {
@@ -79,7 +80,15 @@ export default class App extends React.Component {
             PE: quote.summaryDetail.trailingPE,
             PEG: (quote.defaultKeyStatistics === undefined) ? undefined : quote.defaultKeyStatistics.pegRatio,
             debtToEquity: (quote.financialData === undefined) ? null : quote.financialData.debtToEquity,
-            freeCashFlow: (quote.financialData === undefined) ? null : quote.financialData.freeCashflow
+            freeCashFlow: (quote.financialData === undefined) ? null : quote.financialData.freeCashflow,
+            previousClose: quote.summaryDetail.regularMarketPreviousClose,
+            open: quote.summaryDetail.open,
+            bid: quote.summaryDetail.bid,
+            ask: quote.summaryDetail.ask,
+            beta: quote.summaryDetail.beta,
+            volume: quote.summaryDetail.volume,
+            avgVolume: quote.summaryDetail.averageVolume,
+            eps: (quote.financialData === undefined) ? null : quote.financialData.trailingEps
 	  			}
 	  			copyWatch.push(newItem)
 	  			self.setState({

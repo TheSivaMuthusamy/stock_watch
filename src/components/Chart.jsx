@@ -9,7 +9,8 @@ export default class Chart extends React.Component {
 		this.state = {
 			data: [],
       timeperiod: '1mo',
-      headlines: []
+      headlines: [],
+      currentData: {}
 		}
 		this.getChart = this.getChart.bind(this);
 		this.createChart = this.createChart.bind(this);
@@ -17,6 +18,38 @@ export default class Chart extends React.Component {
 	}
 
   componentDidMount() {
+    const self = this
+    if (this.props.watch.filter((el) => el.symbol === this.props.current)[0]) {
+      const currentData = (this.props.watch.filter((el) => el.symbol === this.props.current)[0])
+      this.setState({
+        currentData: currentData
+      })
+    } else {
+      yahooFinance.quote({
+          symbol: self.props.current,
+          modules: ['price', 'defaultKeyStatistics', 'financialData', 'summaryDetail']       
+      }, function(err, quote) {
+          const newData = {
+            symbol: quote.price.symbol,
+            name: quote.price.shortName,
+            price: quote.price.regularMarketPrice,
+            marketCap: quote.price.marketCap,
+            changePercent: quote.price.regularMarketChangePercent,
+            PE: quote.summaryDetail.trailingPE,
+            previousClose: quote.summaryDetail.regularMarketPreviousClose,
+            open: quote.summaryDetail.open,
+            bid: quote.summaryDetail.bid,
+            ask: quote.summaryDetail.ask,
+            beta: quote.summaryDetail.beta,
+            volume: quote.summaryDetail.volume,
+            avgVolume: quote.summaryDetail.averageVolume,
+            eps: (quote.financialData === undefined) ? null : quote.financialData.trailingEps
+          }
+          self.setState({
+            currentData: newData
+          })
+      });
+    }
     this.getHeadlines(this.props.current)
     this.getChart(this.props.current, '90m', '1mo')
   }
@@ -61,7 +94,7 @@ export default class Chart extends React.Component {
   createChart() {
     d3.selectAll("svg > *").remove();
     const self = this;
-    const lineColor = (this.props.watch.filter((el) => el.symbol === self.props.current)[0].change > 0) ? '#00E676' : '#ff333a'
+    const lineColor = (this.state.currentData.change > 0) ? '#00E676' : '#ff333a'
     const svg = d3.select("svg"),
    	margin = {top: 10, right: 20, bottom: 30, left: 50},
     width = 890,
@@ -249,6 +282,28 @@ export default class Chart extends React.Component {
   }
 
 	render() {
+    const priceChangeColor = (this.state.currentData.changePercent > 0 ? '#00E676' : '#ff333a' )
+    function round(value, decimals) {
+      return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+    }
+
+    function valueFormat(labelValue) {
+
+      // Nine Zeroes for Billions
+      return Math.abs(Number(labelValue)) >= 1.0e+9
+
+      ? round((Number(labelValue)) / 1.0e+9, 2) + "B"
+      // Six Zeroes for Millions 
+      : Math.abs(Number(labelValue)) >= 1.0e+6
+
+      ? round((Number(labelValue)) / 1.0e+6, 2) + "M"
+      // Three Zeroes for Thousands
+      : Math.abs(Number(labelValue)) >= 1.0e+3
+
+      ? round((Number(labelValue)) / 1.0e+3, 2) + "K"
+
+      : Math.abs(Number(labelValue));
+    }   
 		return (
       <div>
          <div className="timeperiod-control">
@@ -272,6 +327,28 @@ export default class Chart extends React.Component {
   			<svg ref={node => this.node = node}
         	width={1000} height={500}>
         </svg>
+        <div className="basic-info-container" style={{width: '990px', margin: '0 auto'}}>
+          <div className="symbol-name" style={{width: '50%', display: 'inline-block'}}>
+            <div style={{fontSize: '36px', fontWeight: '700', display: 'inline-block', color: 'white'}}>
+              {this.state.currentData.symbol}
+            </div>
+            <div style={{fontSize: '24px', fontWeight: '500', display: 'inline-block', color: 'white'}}>
+              {'(' + this.state.currentData.name + ')'}
+            </div>
+          </div>
+          <div className="price-change" style={{width: '50%', display: 'inline-block', textAlign: 'right'}}>
+            <div style={{fontSize: '36px', fontWeight: '700', display: 'inline-block', color: priceChangeColor}}>
+              {this.state.currentData.price}
+            </div>
+            <div style={{fontSize: '24px', fontWeight: '500', display: 'inline-block', color: priceChangeColor}}>
+              {'(' + round(100 * this.state.currentData.changePercent, 2) + '%)'}
+            </div>
+          </div>
+        </div>
+        <div className="stats-chart">
+          <div className="column-one">
+          </div>
+        </div>
         <hr style={{margin: '30px 0'}} />
         <hr style={{marginBottom: '10px'}}/>
         <div className="headlines">
