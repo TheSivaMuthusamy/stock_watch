@@ -55,7 +55,9 @@ export default class Chart extends React.Component {
   }
     
   componentDidUpdate() {
-   this.createChart()
+    if(Object.keys(this.state.currentData).length !== 0){
+      this.createChart()
+    }
   }
 
 	getChart(symbol, interval = '1d', range = '1y') {
@@ -94,7 +96,7 @@ export default class Chart extends React.Component {
   createChart() {
     d3.selectAll("svg > *").remove();
     const self = this;
-    const lineColor = (this.state.currentData.change > 0) ? '#00E676' : '#ff333a'
+    const lineColor = (this.state.currentData.changePercent > 0) ? '#00E676' : '#ff333a'
     const svg = d3.select("svg"),
    	margin = {top: 10, right: 20, bottom: 30, left: 50},
     width = 890,
