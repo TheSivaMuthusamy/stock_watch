@@ -357,7 +357,7 @@ export default class Chart extends React.Component {
           {this.state.headlines.map((headline, key) => {
             return  (
               <div className="headline" key={key}>
-                <a className="title" href={headline.url.slice(0, -10)}>{headline.title}</a>
+                <a className="title" href={headline.url.slice(0, -10)}>{headline.title.replace('&#139', "'")}</a>
                 <div className="description">{headline.description}</div>
               </div>
             )
